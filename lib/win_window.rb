@@ -1,8 +1,8 @@
 require 'dl/import'
 require 'dl/struct'
 
-class HWND
-  # Class that wraps useful methods of user32.dll involving hwnd's 
+class WinWindow
+  # Class that wraps useful methods of user32.dll involving windows in MS Windows (oh wonderful naming)
   #
   #--
   #
@@ -77,9 +77,9 @@ class HWND
 
   attr_reader :hwnd
 
-  # takes a hwnd handle (integer) 
+  # creates a WinWindow from a given hWnd handle (integer) 
   #
-  # raises ArgumentError if the hwnd is not a Fixnum greater than 0
+  # raises ArgumentError if the hWnd is not a Fixnum greater than 0
   def initialize(hwnd)
     raise ArgumentError, "hwnd must be an integer greater than 0" unless hwnd.is_a?(Fixnum) && hwnd > 0
     @hwnd=hwnd
@@ -111,7 +111,7 @@ class HWND
   # differences are documented here: http://msdn.microsoft.com/en-us/magazine/cc301438.aspx
   # and here: http://blogs.msdn.com/oldnewthing/archive/2003/08/21/54675.aspx
   def retrieve_text
-    buff_size=4096
+    buff_size=retrieve_text_length+1
     buff="\000"*buff_size
     len, (passed_hwnd, passed_thing, buff_size, buff)= User32['SendMessage', 'ILIIS'].call(hwnd, WM_GETTEXT, buff_size, buff)
     @get_text=buff[0...len]
@@ -146,7 +146,7 @@ class HWND
   # http://msdn.microsoft.com/en-us/library/ms633515(VS.85).aspx
   def enabled_popup
     popup_hwnd, args=User32['GetWindow', 'LLL'].call(hwnd, GW_ENABLEDPOPUP)
-    @enabled_popup= popup_hwnd > 0 && popup_hwnd != self.hwnd ? HWND.new(popup_hwnd) : nil
+    @enabled_popup= popup_hwnd > 0 && popup_hwnd != self.hwnd ? self.class.new(popup_hwnd) : nil
   end
 
   # The retrieved handle identifies the specified window's owner window, if any. 
@@ -154,7 +154,7 @@ class HWND
   # http://msdn.microsoft.com/en-us/library/ms633515(VS.85).aspx
   def owner
     owner_hwnd, args=User32['GetWindow', 'LLL'].call(hwnd, GW_OWNER)
-    @owner= owner_hwnd > 0 ? HWND.new(owner_hwnd) : nil
+    @owner= owner_hwnd > 0 ? self.class.new(owner_hwnd) : nil
   end
   
   # Retrieves the parent window. This does not include the owner, as it does with #parent
@@ -162,7 +162,7 @@ class HWND
   # http://msdn.microsoft.com/en-us/library/ms633502(VS.85).aspx
   def ancestor_parent
     ret_hwnd, args=User32['GetAncestor', 'LLI'].call(hwnd, GA_PARENT)
-    @ancestor_parent= ret_hwnd > 0 ? HWND.new(ret_hwnd) : nil
+    @ancestor_parent= ret_hwnd > 0 ? self.class.new(ret_hwnd) : nil
   end
   
   # Retrieves the root window by walking the chain of parent windows.
@@ -170,7 +170,7 @@ class HWND
   # http://msdn.microsoft.com/en-us/library/ms633502(VS.85).aspx
   def ancestor_root
     ret_hwnd, args=User32['GetAncestor', 'LLI'].call(hwnd, GA_ROOT)
-    @ancestor_root= ret_hwnd > 0 ? HWND.new(ret_hwnd) : nil
+    @ancestor_root= ret_hwnd > 0 ? self.class.new(ret_hwnd) : nil
   end
   
   # Retrieves the owned root window by walking the chain of parent and owner windows returned by GetParent. 
@@ -178,7 +178,7 @@ class HWND
   # http://msdn.microsoft.com/en-us/library/ms633502(VS.85).aspx
   def ancestor_root_owner
     ret_hwnd, args=User32['GetAncestor', 'LLI'].call(hwnd, GA_ROOTOWNER)
-    @ancestor_root_owner= ret_hwnd > 0 ? HWND.new(ret_hwnd) : nil
+    @ancestor_root_owner= ret_hwnd > 0 ? self.class.new(ret_hwnd) : nil
   end
   
   # determines which pop-up window owned by the specified window was most recently active
@@ -186,7 +186,7 @@ class HWND
   # http://msdn.microsoft.com/en-us/library/ms633507(VS.85).aspx
   def last_active_popup
     ret_hwnd, args=User32['GetLastActivePopup', 'LL'].call(hwnd)
-    @last_active_popup= ret_hwnd > 0 ? HWND.new(ret_hwnd) : nil
+    @last_active_popup= ret_hwnd > 0 ? self.class.new(ret_hwnd) : nil
   end
   
   # examines the Z order of the child windows associated with self and retrieves a handle to the child window at the top of the Z order
@@ -194,7 +194,7 @@ class HWND
   # http://msdn.microsoft.com/en-us/library/ms633514(VS.85).aspx
   def top_window
     ret_hwnd, args=User32['GetTopWindow', 'LL'].call(hwnd)
-    @top_window= ret_hwnd > 0 ? HWND.new(ret_hwnd) : nil
+    @top_window= ret_hwnd > 0 ? self.class.new(ret_hwnd) : nil
   end
 
   # retrieves a handle to this window's parent or owner
@@ -202,23 +202,23 @@ class HWND
   # http://msdn.microsoft.com/en-us/library/ms633510(VS.85).aspx
   def parent
     parent_hwnd,args=User32['GetParent', 'LL'].call(hwnd)
-    @parent= parent_hwnd > 0 ? HWND.new(parent_hwnd) : nil
+    @parent= parent_hwnd > 0 ? self.class.new(parent_hwnd) : nil
   end
 
   # changes the parent window of this child window
   #
   # http://msdn.microsoft.com/en-us/library/ms633541(VS.85).aspx
   def set_parent!(parent)
-    parent_hwnd= parent.is_a?(HWND) ? parent.hwnd : parent
+    parent_hwnd= parent.is_a?(self.class) ? parent.hwnd : parent
     new_parent, args=User32['SetParent', 'LLL'].call(hwnd, parent_hwnd)
-    new_parent > 0 ? HWND.new(new_parent) : nil
+    new_parent > 0 ? self.class.new(new_parent) : nil
   end
 
   # tests whether a window is a child window or descendant window of a specified parent window. A child window is the direct descendant of a specified parent window if that parent window is in the chain of parent windows; the chain of parent windows leads from the original overlapped or pop-up window to the child window.
   #
   # http://msdn.microsoft.com/en-us/library/ms633524(VS.85).aspx
   def child_of?(parent)
-    parent_hwnd= parent.is_a?(HWND) ? parent.hwnd : parent
+    parent_hwnd= parent.is_a?(self.class) ? parent.hwnd : parent
     child, args=User32['IsChild', 'CLL'].call(parent_hwnd, hwnd)
     child!=WIN_FALSE
   end
@@ -436,7 +436,7 @@ class HWND
     ret != WIN_FALSE
   end
 
-  # tries to click on this HWND
+  # tries to click on this Window
   # Clicking might not always work! Especially if the window is not focused (frontmost application). 
   # The BM_CLICK message might just be ignored, or maybe it will just focus the hwnd but not really click.
   def click!
@@ -444,17 +444,17 @@ class HWND
     nil
   end
 
-  # iterates over each child, yielding a HWND object. 
-  # raises a HWND::NotExistsError if the window does not exist, or a HWND::SystemError if a System Error errors.
+  # iterates over each child, yielding a WinWindow object. 
+  # raises a WinWindow::NotExistsError if the window does not exist, or a WinWindow::SystemError if a System Error errors.
   # use #children to get an Enumerable object. 
   #
   # http://msdn.microsoft.com/en-us/library/ms633494(VS.85).aspx
   #
   # For System Error Codes see http://msdn.microsoft.com/en-us/library/ms681381(VS.85).aspx
   def each_child
-    raise HWND::NotExistsError.new, "Window does not exist! Cannot enumerate children." unless exists?
+    raise WinWindow::NotExistsError.new, "Window does not exist! Cannot enumerate children." unless exists?
     enum_child_windows_callback= DL.callback('ILL') do |chwnd, lparam|
-      yield HWND.new(chwnd)
+      yield WinWindow.new(chwnd)
       WIN_TRUE
     end
     begin
@@ -464,7 +464,7 @@ class HWND
     end
     if ret==0
       code, args=Kernel32['GetLastError','I'].call
-      raise HWND::SystemError, "EnumChildWindows encountered an error (System Error Code #{code})"
+      raise WinWindow::SystemError, "EnumChildWindows encountered an error (System Error Code #{code})"
       # actually, EnumChildWindows doesn't say anything about return value indicating error encountered.
       # Although EnumWindows does, so it seems sort of safe to assume that would apply here too. 
       # but, maybe not - so, should we raise an error here? 
@@ -472,10 +472,10 @@ class HWND
     nil
   end
   
-  # returns an Enumerable object that can iterate over each child of this HWND, 
-  # yielding a HWND object 
+  # returns an Enumerable object that can iterate over each child of this window, 
+  # yielding a WinWindow object 
   #
-  # may raise a HWND::SystemError from #each_child 
+  # may raise a WinWindow::SystemError from #each_child 
   def children
     Children.new self
   end
@@ -506,11 +506,11 @@ class HWND
   # * :exception is the exception class or instance that will be raised if we can't click the button (default nil, no exception is raised, the return value indicates success/failure)
   #
   # Raises ArgumentError if invalid options are given. 
-  # Raises a HWND::NotExistsError if the button doesn't exist, or if this window doesn't exist, or a HWND::SystemError if a System Error occurs (from #each_child)
+  # Raises a WinWindow::NotExistsError if the button doesn't exist, or if this window doesn't exist, or a WinWindow::SystemError if a System Error occurs (from #each_child)
   def click_child_button_try_for!(button_text, time, options={})
     require 'spigot/utilities' #lazy load
     handle_options!(options, {:switch_to => true, :exception => nil, :interval => 0.05})
-    button=child_button(button_text) || (raise HWND::NotExistsError, "Button #{button_text.inspect} not found")
+    button=child_button(button_text) || (raise WinWindow::NotExistsError, "Button #{button_text.inspect} not found")
     waiter_options={}
     waiter_options[:condition]=proc{!button.exists? || (block_given? && yield)}
     waiter_options.merge!(options.reject{|k,v| ![:exception, :interval].include?(k)})
@@ -521,28 +521,28 @@ class HWND
     return waiter_options[:condition].call
   end
 
-  # returns a HWND that is a child of this that matches the given button_text (Regexp or #to_s-able) 
+  # returns a WinWindow that is a child of this that matches the given button_text (Regexp or #to_s-able) 
   # or nil if no such child exists. 
   # & is stripped when matching so don't include it. String comparison is case-insensitive. 
   #
-  # May raise a HWND::SystemError from #each_child
+  # May raise a WinWindow::SystemError from #each_child
   def child_button(button_text)
     children.detect do |child|
       child.class_name=='Button' && button_text.is_a?(Regexp) ? child.text.tr('&', '') =~ button_text : child.text.tr('&', '').downcase==button_text.to_s.tr('&', '').downcase
     end
   end
   
-  # Iterates over every hwnd yielding an HWND object. 
-  # use HWND::All if you want an Enumerable object. 
+  # Iterates over every window yielding a WinWindow object. 
+  # use WinWindow::All if you want an Enumerable object. 
   #
-  # Raises a HWND::SystemError if a System Error occurs. 
+  # Raises a WinWindow::SystemError if a System Error occurs. 
   # 
   # http://msdn.microsoft.com/en-us/library/ms633497.aspx
   #
   # For System Error Codes see http://msdn.microsoft.com/en-us/library/ms681381(VS.85).aspx
-  def self.each_hwnd
+  def self.each_window
     enum_windows_callback= DL.callback('ILL') do |hwnd,lparam|
-      yield HWND.new(hwnd)
+      yield WinWindow.new(hwnd)
       WIN_TRUE
     end
     begin
@@ -552,36 +552,36 @@ class HWND
     end
     if ret==0
       code, args=Kernel32['GetLastError','I'].call
-      raise HWND::SystemError, "EnumWindows ecountered an error (System Error Code #{code})"
+      raise WinWindow::SystemError, "EnumWindows ecountered an error (System Error Code #{code})"
     end
     nil
   end
   
-  # returns the first HWND found whose text matches what is given
+  # returns the first window found whose text matches what is given
   #
-  # May raise a HWND::SystemError from HWND.each_hwnd
+  # May raise a WinWindow::SystemError from WinWindow.each_window
   def self.find_first_by_text(text)
-    HWND::All.detect do |hwnd|
-      text===hwnd.text # use triple-equals so regexps try to match, strings see if equal 
+    WinWindow::All.detect do |window|
+      text===window.text # use triple-equals so regexps try to match, strings see if equal 
     end
   end
 
-  # returns all HWND objects found whose text matches what is given
+  # returns all WinWindow objects found whose text matches what is given
   #
-  # May raise a HWND::SystemError from HWND.each_hwnd
+  # May raise a WinWindow::SystemError from WinWindow.each_hwnd
   def self.find_all_by_text(text)
-    HWND::All.select do |hwnd|
-      text===hwnd.text # use triple-equals so regexps try to match, strings see if equal 
+    WinWindow::All.select do |window|
+      text===window.text # use triple-equals so regexps try to match, strings see if equal 
     end
   end
 
-  # raises a HWND::MatchError if more than one window matching given text is found, 
+  # raises a WinWindow::MatchError if more than one window matching given text is found, 
   # so that you can be sure you are attaching to the right one (because it's the only one)
   #
-  # May also raise a HWND::SystemError from HWND.each_hwnd
+  # May also raise a WinWindow::SystemError from WinWindow.each_window
  def self.find_only_by_text(text)
-    matched=HWND::All.select do |hwnd|
-      text===hwnd.text
+    matched=WinWindow::All.select do |window|
+      text===window.text
     end
     if matched.size != 1
       raise MatchError, "Found #{matched.size} windows matching #{text.inspect}; there should be one"
@@ -590,29 +590,29 @@ class HWND
     end
   end
 
-  # Enumerable object that iterates over every available HWND 
+  # Enumerable object that iterates over every available window 
   #
-  # May raise a HWND::SystemError from HWND.each_hwnd
+  # May raise a WinWindow::SystemError from WinWindow.each_window
   module All
     def self.each
-      HWND.each_hwnd do |hwnd|
-        yield hwnd
+      WinWindow.each_window do |window|
+        yield window
       end
     end
     extend Enumerable
   end
 
-  # instantiates Enumerable objects that iterate over a HWND's children. 
+  # instantiates Enumerable objects that iterate over a WinWindow's children. 
   #
-  # May raise a HWND::SystemError from HWND#each_child
+  # May raise a WinWindow::SystemError from WinWindow#each_child
   class Children
-    attr_reader :parenthwnd
-    def initialize(parenthwnd)
-      @parenthwnd=parenthwnd
+    attr_reader :parentwindow
+    def initialize(parentwindow)
+      @parentwindow=parentwindow
     end
     def each
-      parenthwnd.each_child do |chwnd|
-        yield chwnd
+      parentwindow.each_child do |cwindow|
+        yield cwindow
       end
     end
     include Enumerable
