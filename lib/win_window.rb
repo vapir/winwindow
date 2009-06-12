@@ -294,7 +294,41 @@ class WinWindow
     ret, args=User32['SetForegroundWindow','CL'].call(hwnd)
     ret != WIN_FALSE
   end
+
   
+  LSFW_LOCK = 1
+  LSFW_UNLOCK = 2
+  def self.lock_set_foreground_window
+    ret, args=User32['LockSetForegroundWindow', 'CI'].call(LSFW_LOCK)
+    ret != WIN_FALSE
+  end
+  def self.unlock_set_foreground_window
+    ret, args=User32['LockSetForegroundWindow', 'CI'].call(LSFW_UNLOCK)
+    ret != WIN_FALSE
+  end
+
+  VK_MENU=0x12
+  KEYEVENTF_KEYDOWN=0x2
+  KEYEVENTF_KEYUP=0x2
+  # attempts to circumvent a lock disabling calls made by set_foreground!
+  # then call set_foreground! and hopefully that will work. 
+  def really_set_foreground!
+    # Simulate two single ALT keystrokes in order to deactivate lock on SetForeGroundWindow before we call it.
+    # See LockSetForegroundWindow, http://msdn.microsoft.com/en-us/library/ms633532(VS.85).aspx
+    # also keybd_event, see http://msdn.microsoft.com/en-us/library/ms646304(VS.85).aspx
+    #
+    # this is taken from AutoIt's setforegroundwinex.cpp in SetForegroundWinEx::Activate(HWND hWnd)
+    # keybd_event((BYTE)VK_MENU, MapVirtualKey(VK_MENU, 0), 0, 0);
+    # keybd_event((BYTE)VK_MENU, MapVirtualKey(VK_MENU, 0), KEYEVENTF_KEYUP, 0);
+
+    mapped_vk_menu, args=User32['MapVirtualKey', 'III'].call(VK_MENU, 0)
+    2.times do
+      ret, args=User32['keybd_event','CCCCC'].call(VK_MENU, mapped_vk_menu, KEYEVENTF_KEYDOWN, 0)
+      ret, args=User32['keybd_event','CCCCC'].call(VK_MENU, mapped_vk_menu, KEYEVENTF_KEYUP, 0)
+    end
+    set_foreground!
+  end
+
   # brings the window to the top of the Z order. If the window is a top-level window, it is activated. If the window is a child window, the top-level parent window associated with the child window is activated.
   #
   # http://msdn.microsoft.com/en-us/library/ms632673(VS.85).aspx
@@ -502,20 +536,22 @@ class WinWindow
   # the given block is true (ie, not false or nil)
   # Options:
   # * :interval is the length of time in seconds between each attempt (default 0.05)
-  # * :switch_to is whether #switch_to! should be called on self before each attempt, since button-clicking is much more likely to fail if the window isn't focused (default true)
+  # * :set_foreground is whether the window should be activated first, since button-clicking is much more likely to fail if the window isn't focused (default true)
   # * :exception is the exception class or instance that will be raised if we can't click the button (default nil, no exception is raised, the return value indicates success/failure)
   #
   # Raises ArgumentError if invalid options are given. 
   # Raises a WinWindow::NotExistsError if the button doesn't exist, or if this window doesn't exist, or a WinWindow::SystemError if a System Error occurs (from #each_child)
   def click_child_button_try_for!(button_text, time, options={})
-    require 'spigot/utilities' #lazy load
-    handle_options!(options, {:switch_to => true, :exception => nil, :interval => 0.05})
+    handle_options!(options, {:set_foreground => true, :exception => nil, :interval => 0.05})
     button=child_button(button_text) || (raise WinWindow::NotExistsError, "Button #{button_text.inspect} not found")
     waiter_options={}
     waiter_options[:condition]=proc{!button.exists? || (block_given? && yield)}
     waiter_options.merge!(options.reject{|k,v| ![:exception, :interval].include?(k)})
     Waiter.try_for(time, waiter_options) do
-      switch_to! if options[:switch_to]
+      if options[:set_foreground]
+        show_normal!
+        really_set_foreground!
+      end
       button.click!
     end
     return waiter_options[:condition].call
