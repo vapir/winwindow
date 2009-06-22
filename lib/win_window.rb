@@ -568,6 +568,26 @@ class WinWindow
     end
   end
   
+  # Finds a child of this window which follows a label with the given text. 
+  #
+  # Options:
+  # - :control_class_name is the class name of the control you are looking for. Defaults to nil, which accepts any class name. 
+  # - :label_class_name is the class name of the label preceding the control you are looking for. Defaults to 'Static'
+  def child_control_with_preceding_label(preceding_label_text, options={})
+    handle_options!(options, :control_class_name => nil, :label_class_name => "Static")
+    
+    prev_was_label=false
+    control=self.children.detect do |child|
+      ret=prev_was_label && (!options[:control_class_name] || child.class_name==options[:control_class_name])
+      prev_was_label= child.class_name==options[:label_class_name] && preceding_label_text===child.text
+      ret
+    end
+  end
+
+
+
+  # Class methods:
+  
   # Iterates over every window yielding a WinWindow object. 
   # use WinWindow::All if you want an Enumerable object. 
   #
@@ -592,7 +612,8 @@ class WinWindow
     end
     nil
   end
-  
+
+
   # returns the first window found whose text matches what is given
   #
   # May raise a WinWindow::SystemError from WinWindow.each_window
