@@ -114,7 +114,7 @@ class WinWindow
     buff_size=retrieve_text_length+1
     buff="\000"*buff_size
     len, (passed_hwnd, passed_thing, buff_size, buff)= User32['SendMessage', 'ILIIS'].call(hwnd, WM_GETTEXT, buff_size, buff)
-    @get_text=buff[0...len]
+    @text=buff[0...len]
   end
   
   # similar to #text_length; differences between that and this are the same as between #text and #retrieve_text 
@@ -181,7 +181,7 @@ class WinWindow
     @ancestor_root_owner= ret_hwnd > 0 ? self.class.new(ret_hwnd) : nil
   end
   
-  # determines which pop-up window owned by the specified window was most recently active
+  # determines which pop-up window owned by this window was most recently active
   #
   # http://msdn.microsoft.com/en-us/library/ms633507(VS.85).aspx
   def last_active_popup
@@ -308,7 +308,7 @@ class WinWindow
   end
 
   VK_MENU=0x12
-  KEYEVENTF_KEYDOWN=0x2
+  KEYEVENTF_KEYDOWN=0x0
   KEYEVENTF_KEYUP=0x2
   # attempts to circumvent a lock disabling calls made by set_foreground!
   # then call set_foreground! and hopefully that will work. 
@@ -317,7 +317,7 @@ class WinWindow
     # See LockSetForegroundWindow, http://msdn.microsoft.com/en-us/library/ms633532(VS.85).aspx
     # also keybd_event, see http://msdn.microsoft.com/en-us/library/ms646304(VS.85).aspx
     #
-    # this is taken from AutoIt's setforegroundwinex.cpp in SetForegroundWinEx::Activate(HWND hWnd)
+    # this idea is taken from AutoIt's setforegroundwinex.cpp in SetForegroundWinEx::Activate(HWND hWnd)
     # keybd_event((BYTE)VK_MENU, MapVirtualKey(VK_MENU, 0), 0, 0);
     # keybd_event((BYTE)VK_MENU, MapVirtualKey(VK_MENU, 0), KEYEVENTF_KEYUP, 0);
 
@@ -606,7 +606,7 @@ class WinWindow
     ensure
       DL.remove_callback(enum_windows_callback)
     end
-    if ret==0
+    if ret==WIN_FALSE
       code, args=Kernel32['GetLastError','I'].call
       raise WinWindow::SystemError, "EnumWindows ecountered an error (System Error Code #{code})"
     end
