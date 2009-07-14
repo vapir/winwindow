@@ -85,6 +85,12 @@ class WinWindow
     @hwnd=hwnd
   end
   
+  def inspect
+    text
+    class_name
+    Object.instance_method(:inspect).bind(self).call
+  end
+  
   # retrieves the text of this window's title bar (if it has one). If this is a control, the text of the control is retrieved. 
   # However, #text cannot retrieve the text of a control in another application (see #retrieve_text) 
   #
