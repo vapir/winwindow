@@ -86,7 +86,7 @@ class WinWindow
   end
   
   def inspect
-    text
+    retrieve_text
     class_name
     Object.instance_method(:inspect).bind(self).call
   end
@@ -492,7 +492,7 @@ class WinWindow
   #
   # For System Error Codes see http://msdn.microsoft.com/en-us/library/ms681381(VS.85).aspx
   def each_child
-    raise WinWindow::NotExistsError.new, "Window does not exist! Cannot enumerate children." unless exists?
+    raise WinWindow::NotExistsError, "Window does not exist! Cannot enumerate children." unless exists?
     enum_child_windows_callback= DL.callback('ILL') do |chwnd, lparam|
       yield WinWindow.new(chwnd)
       WIN_TRUE
