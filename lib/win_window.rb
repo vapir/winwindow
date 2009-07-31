@@ -646,6 +646,29 @@ class WinWindow
     matched=WinWindow::All.select do |window|
       text===window.text
     end
+#    matched.reject! do |win|          # reject win where
+#      matched.any? do |other_win|     # exists any other_win 
+#        parent=other_win.parent
+#        win_is_parent=false
+#        while parent && !win_is_parent
+#          win_is_parent ||= win==parent
+#          parent=parent.parent
+#        end
+#        win_is_parent                  # such that win is parent of other_win
+#      end
+#    end
+    matched.reject! do |win|           # reject any win where
+      matched.any? do |other_win|      # any other_win
+        parent=win.parent
+        other_is_parent=false
+        while parent && !other_is_parent
+          other_is_parent ||= other_win==parent
+          parent=parent.parent
+        end
+        other_is_parent                 # is its parent
+      end
+    end
+
     if matched.size != 1
       raise MatchError, "Found #{matched.size} windows matching #{text.inspect}; there should be one"
     else
