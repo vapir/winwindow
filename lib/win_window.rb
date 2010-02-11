@@ -306,6 +306,10 @@ class WinWindow
     ret, args=User32['SetForegroundWindow','CL'].call(hwnd)
     ret != WIN_FALSE
   end
+  
+  def foreground?
+    self==self.class.foreground_window
+  end
 
   
   LSFW_LOCK = 1
@@ -648,7 +652,7 @@ class WinWindow
   # so that you can be sure you are attaching to the right one (because it's the only one)
   #
   # May also raise a WinWindow::SystemError from WinWindow.each_window
- def self.find_only_by_text(text)
+  def self.find_only_by_text(text)
     matched=WinWindow::All.select do |window|
       text===window.text
     end
@@ -679,6 +683,15 @@ class WinWindow
       raise MatchError, "Found #{matched.size} windows matching #{text.inspect}; there should be one"
     else
       return matched.first
+    end
+  end
+  
+  def self.foreground_window
+    hwnd,args=User32['GetForegroundWindow', 'I'].call
+    if hwnd == 0
+      nil
+    else
+      self.new(hwnd)
     end
   end
 
