@@ -1007,7 +1007,7 @@ class WinWindow
   end
 
   private
-  FORMAT_MESSAGE_FROM_SYSTEM=0x00001000
+  FORMAT_MESSAGE_FROM_SYSTEM=0x00001000 # :nodoc:
   # get the last error from GetLastError, format an error message with FormatMessage, and raise a WinWindow::SystemError 
   def self.system_error(function)
     code=WinKernel.GetLastError
@@ -1061,11 +1061,8 @@ class WinWindow
     oth.class==self.class && oth.hwnd==self.hwnd
   end
   alias == eql?
-#  def ==(oth)
-#    self.eql?(oth)
-#  end
 
-  def hash
+  def hash # :nodoc:
     [self.class, self.hwnd].hash
   end
 
@@ -1076,6 +1073,7 @@ class WinWindow
   # Give the name of a button, or a Regexp to match it (see #child_button).
   # keeps clicking the button until the button no longer exists, or until 
   # the given block is true (ie, not false or nil)
+  #
   # Options:
   # * :interval is the length of time in seconds between each attempt (default 0.05)
   # * :set_foreground is whether the window should be activated first, since button-clicking is much more likely to fail if the window isn't focused (default true)
@@ -1249,6 +1247,9 @@ class WinWindow
   #
   # May raise a WinWindow::SystemError from WinWindow.each_window
   module All
+    # Iterates over every window yielding a WinWindow object. 
+    #
+    # see WinWindow.each_window
     def self.each
       WinWindow.each_window do |window|
         yield window
@@ -1261,10 +1262,15 @@ class WinWindow
   #
   # May raise a WinWindow::SystemError from WinWindow#each_child
   class Children
+    # the parent window 
     attr_reader :parentwindow
+    # creates a Children Enumerable from the given parentwindow 
     def initialize(parentwindow)
       @parentwindow=parentwindow
     end
+    # iterates over each child this represents, yielding a WinWindow object. 
+    #
+    # see WinWindow#each_child which this calls. 
     def each
       parentwindow.each_child do |child_window|
         yield child_window
