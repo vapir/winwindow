@@ -4,6 +4,9 @@ require(File.join(File.dirname(__FILE__), 'winwindow','ext'))
 class WinWindow
   # :stopdoc:
   
+  require 'enumerator'
+  Enumerator = Object.const_defined?('Enumerator') ? ::Enumerator : Enumerable::Enumerator # :nodoc:
+
   # todo: 
   # * GetTitleBarInfo http://msdn.microsoft.com/en-us/library/ms633513(VS.85).aspx
   # * GetWindowInfo http://msdn.microsoft.com/en-us/library/ms633516(VS.85).aspx http://msdn.microsoft.com/en-us/library/ms632610(VS.85).aspx
@@ -1052,7 +1055,7 @@ class WinWindow
   #
   # may raise a WinWindow::SystemError from #each_child 
   def children
-    Enumerable::Enumerator.new(self, :each_child)
+    Enumerator.new(self, :each_child)
   end
 
   # true if comparing an object of the same class with the same hwnd (integer) 
@@ -1157,7 +1160,7 @@ class WinWindow
   # Enumerable object that iterates over every available window 
   #
   # May raise a WinWindow::SystemError from WinWindow.each_window
-  All = Enumerable::Enumerator.new(WinWindow, :each_window)
+  All = Enumerator.new(WinWindow, :each_window)
 
   # returns the first window found whose text matches what is given
   #
