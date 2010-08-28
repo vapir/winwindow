@@ -1,5 +1,4 @@
-require 'watir/handle_options'
-require 'watir/waiter'
+require(File.join(File.dirname(__FILE__), 'winwindow','ext'))
 
 # Class that wraps useful methods of user32.dll involving windows in MS Windows 
 class WinWindow
