@@ -233,6 +233,18 @@ class TestWinWindow < MiniTest::Unit::TestCase
     assert_equal WinWindow::All.to_a, all_wins
     assert all_wins.size > 0
   end
+  def test_children_recursive
+    cwins = []
+    @win.recurse_each_child do |cwin|
+      assert cwin.is_a?(WinWindow)
+      assert cwin.exists?
+      #assert cwin.child_of?(@win)
+      cwins << cwin
+    end
+    assert_equal @win.children_recursive.to_a, cwins
+    require 'set'
+    assert Set.new(@win.children).subset?(Set.new(@win.children_recursive))
+  end
   def test_finding
     assert WinWindow.find_first_by_text(//).is_a?(WinWindow)
     found_any = false
