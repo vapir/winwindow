@@ -245,6 +245,17 @@ class TestWinWindow < MiniTest::Unit::TestCase
     require 'set'
     assert Set.new(@win.children).subset?(Set.new(@win.children_recursive))
   end
+  def test_system_error
+    assert_raises(WinWindow::SystemError) do
+      begin
+        @win.recurse_each_child(:rescue_enum_child_windows => false) { nil }
+      rescue WinWindow::SystemError # not really rescuing, just checking info
+        assert_equal 'EnumChildWindows', $!.function
+        assert $!.code.is_a?(Integer)
+        raise
+      end
+    end
+  end
   def test_finding
     assert WinWindow.find_first_by_text(//).is_a?(WinWindow)
     found_any = false
