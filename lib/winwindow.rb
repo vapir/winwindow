@@ -40,6 +40,15 @@ class WinWindow
 #=begin
     # here begins the FFI version. this one needs to hack improperly into FFI's internals, bypassing its
     # broken API for #callback which doesn't set the calling convention, causing segfaults. 
+    begin
+      require 'rubygems'
+      # prefer 0.5.4 because of bug: http://github.com/ffi/ffi/issues/issue/59
+      gem 'ffi', '= 0.5.4'
+      CanTrustFormatMessage = true
+    rescue LoadError
+      # if we didn't get 0.5.4, we should assume that calling FormatMessage will segfault. 
+      CanTrustFormatMessage = false
+    end
     require 'ffi'
 
     # types that FFI recognizes
@@ -1068,12 +1077,16 @@ class WinWindow
   def self.system_error(function)
     code=WinKernel.GetLastError
     
-    dwFlags=FORMAT_MESSAGE_FROM_SYSTEM
-    buff_size=65535
-    buff="\1"*buff_size
-    len=WinKernel.FormatMessageA(dwFlags, nil, code, 0, buff, buff_size)
-    system_error_message=buff[0...len]
-    raise WinWindow::SystemError, "#{function} encountered an error\nSystem Error Code #{code}\n"+system_error_message
+    if AttachLib::CanTrustFormatMessage
+      dwFlags=FORMAT_MESSAGE_FROM_SYSTEM
+      buff_size=65535
+      buff="\1"*buff_size
+      len=WinKernel.FormatMessageA(dwFlags, nil, code, 0, buff, buff_size)
+      system_error_message="\n"+buff[0...len]
+    else
+      system_error_message = ''
+    end
+    raise WinWindow::SystemError, "#{function} encountered an error\nSystem Error Code #{code}"+system_error_message
   end
   public
     
