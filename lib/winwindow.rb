@@ -387,8 +387,9 @@ class WinWindow
     pp.pp_object(self)
   end
 
-  # retrieves the text of this window's title bar (if it has one). If this is a control, the text of the control is retrieved. 
-  # However, #text cannot retrieve the text of a control in another application (see #retrieve_text) 
+  # retrieves the text of this window's title bar (if it has one). If this is a control, the text 
+  # of the control is retrieved. However, #text cannot retrieve the text of a control in another 
+  # application (see #retrieve_text) 
   #
   # http://msdn.microsoft.com/en-us/library/ms633520(VS.85).aspx
   def text
@@ -400,7 +401,8 @@ class WinWindow
 
   # length of the window text, see #text
   #
-  # similar to #text, cannot retrieve the text of a control in another application - see #retrieve_text, #retrieve_text_length
+  # similar to #text, cannot retrieve the text of a control in another application - see 
+  # #retrieve_text, #retrieve_text_length
   #
   # http://msdn.microsoft.com/en-us/library/ms633521(VS.85).aspx
   def text_length
@@ -420,13 +422,15 @@ class WinWindow
     @text=buff[0...len]
   end
   
-  # similar to #text_length; differences between that and this are the same as between #text and #retrieve_text 
+  # similar to #text_length; differences between that and this are the same as between #text and 
+  # #retrieve_text 
   def retrieve_text_length
     len= WinUser.SendMessageA(hwnd, WM_GETTEXTLENGTH, 0, nil)
     len
   end
 
-  # changes the text of the specified window's title bar (if it has one). If the specified window is a control, the text of the control is changed. 
+  # changes the text of the specified window's title bar (if it has one). If the specified window 
+  # is a control, the text of the control is changed. 
   # However, #set_text! cannot change the text of a control in another application (see #send_set_text!) 
   #
   # http://msdn.microsoft.com/en-us/library/ms633546(VS.85).aspx
@@ -476,7 +480,8 @@ class WinWindow
     @ancestor_root= ret_hwnd > 0 ? self.class.new(ret_hwnd) : nil
   end
   
-  # Retrieves the owned root window by walking the chain of parent and owner windows returned by GetParent. 
+  # Retrieves the owned root window by walking the chain of parent and owner windows returned by 
+  # GetParent. 
   #
   # http://msdn.microsoft.com/en-us/library/ms633502(VS.85).aspx
   def ancestor_root_owner
@@ -492,7 +497,8 @@ class WinWindow
     @last_active_popup= ret_hwnd > 0 ? self.class.new(ret_hwnd) : nil
   end
   
-  # examines the Z order of the child windows associated with self and retrieves a handle to the child window at the top of the Z order
+  # examines the Z order of the child windows associated with self and retrieves a handle to the 
+  # child window at the top of the Z order
   #
   # http://msdn.microsoft.com/en-us/library/ms633514(VS.85).aspx
   def top_window
@@ -517,7 +523,10 @@ class WinWindow
     new_parent > 0 ? self.class.new(new_parent) : nil
   end
 
-  # tests whether a window is a child window or descendant window of a specified parent window. A child window is the direct descendant of a specified parent window if that parent window is in the chain of parent windows; the chain of parent windows leads from the original overlapped or pop-up window to the child window.
+  # tests whether a window is a child window or descendant window of a specified parent window. 
+  # A child window is the direct descendant of a specified parent window if that parent window 
+  # is in the chain of parent windows; the chain of parent windows leads from the original 
+  # overlapped or pop-up window to the child window.
   #
   # http://msdn.microsoft.com/en-us/library/ms633524(VS.85).aspx
   def child_of?(parent)
@@ -526,7 +535,10 @@ class WinWindow
     child!=WIN_FALSE
   end
 
-  # determine if Microsoft Windows considers that a specified application is not responding. An application is considered to be not responding if it is not waiting for input, is not in startup processing, and has not called PeekMessage within the internal timeout period of 5 seconds. 
+  # determine if Microsoft Windows considers that a specified application is not responding. An 
+  # application is considered to be not responding if it is not waiting for input, is not in 
+  # startup processing, and has not called PeekMessage within the internal timeout period of 5 
+  # seconds. 
   #
   # http://msdn.microsoft.com/en-us/library/ms633526.aspx
   def hung_app?
@@ -597,15 +609,21 @@ class WinWindow
   
   # switch focus and bring to the foreground
   #
-  # the argument alt_tab, if true, indicates that the window is being switched to using the Alt/Ctl+Tab key sequence. This argument should be false otherwise.
+  # the argument alt_tab, if true, indicates that the window is being switched to using the 
+  # Alt/Ctl+Tab key sequence. This argument should be false otherwise.
   #
   # http://msdn.microsoft.com/en-us/library/ms633553(VS.85).aspx
   def switch_to!(alt_tab=false)
     WinUser.SwitchToThisWindow(hwnd, alt_tab ? WIN_TRUE : WIN_FALSE)
   end
 
-  # puts the thread that created the specified window into the foreground and activates the window. Keyboard input is directed to the window, and various visual cues are changed for the user. The system assigns a slightly higher priority to the thread that created the foreground window than it does to other threads.
+  # puts the thread that created the specified window into the foreground and activates the 
+  # window. Keyboard input is directed to the window, and various visual cues are changed for the 
+  # user. The system assigns a slightly higher priority to the thread that created the foreground 
+  # window than it does to other threads.
+  #
   # If the window was brought to the foreground, the return value is true.
+  #
   # If the window was not brought to the foreground, the return value is false.
   #
   # http://msdn.microsoft.com/en-us/library/ms633539(VS.85).aspx
@@ -624,7 +642,8 @@ class WinWindow
   LSFW_UNLOCK = 2
   # :startdoc: 
   
-  # The foreground process can call the #lock_set_foreground_window function to disable calls to the #set_foreground! function. 
+  # The foreground process can call the #lock_set_foreground_window function to disable calls to 
+  # the #set_foreground! function. 
   #
   # Disables calls to #set_foreground!
   #
@@ -633,7 +652,8 @@ class WinWindow
     ret= WinUser.LockSetForegroundWindow(LSFW_LOCK)
     ret != WIN_FALSE # todo: raise system error? 
   end
-  # The foreground process can call the #lock_set_foreground_window function to disable calls to the #set_foreground! function. 
+  # The foreground process can call the #lock_set_foreground_window function to disable calls to 
+  # the #set_foreground! function. 
   #
   # Enables calls to #set_foreground!
   #
@@ -650,10 +670,11 @@ class WinWindow
   # :startdoc:
   
   # really sets this to be the foreground window. 
-  # restores the window if it's iconic. 
-  # attempts to circumvent a lock disabling calls made by set_foreground!
-  # then calls set_foreground!, which should then work with that lock disabled. 
-  # tries this for a few seconds, checking if it was successful.
+  # 
+  # - restores the window if it's iconic. 
+  # - attempts to circumvent a lock disabling calls made by set_foreground!
+  # - then calls set_foreground!, which should then work with that lock disabled. 
+  #   tries this for a few seconds, checking if it was successful.
   #
   # if you want it to raise an exception if it can't set the foreground window, 
   # pass :error => true (default is false) 
@@ -685,7 +706,9 @@ class WinWindow
     end
   end
 
-  # brings the window to the top of the Z order. If the window is a top-level window, it is activated. If the window is a child window, the top-level parent window associated with the child window is activated.
+  # brings the window to the top of the Z order. If the window is a top-level window, it is 
+  # activated. If the window is a child window, the top-level parent window associated with the 
+  # child window is activated.
   #
   # http://msdn.microsoft.com/en-us/library/ms632673(VS.85).aspx
   def bring_to_top!
@@ -710,7 +733,9 @@ class WinWindow
     ret != WIN_FALSE
   end
 
-  # Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.
+  # Activates and displays a window. If the window is minimized or maximized, the system restores 
+  # it to its original size and position. An application should specify this flag when displaying 
+  # the window for the first time.
   #
   # http://msdn.microsoft.com/en-us/library/ms633548(VS.85).aspx
   def show_normal!
@@ -742,7 +767,8 @@ class WinWindow
     ret != WIN_FALSE
   end
 
-  # Displays the window in its most recent size and position. This is similar to show_normal!, except the window is not actived.
+  # Displays the window in its most recent size and position. This is similar to show_normal!, 
+  # except the window is not actived.
   #
   # http://msdn.microsoft.com/en-us/library/ms633548(VS.85).aspx
   def show_no_activate!
@@ -766,7 +792,8 @@ class WinWindow
     ret != WIN_FALSE
   end
 
-  # Displays the window as a minimized window. This is similar to show_minimized!, except the window is not activated.
+  # Displays the window as a minimized window. This is similar to show_minimized!, except the 
+  # window is not activated.
   #
   # http://msdn.microsoft.com/en-us/library/ms633548(VS.85).aspx
   def show_min_no_active!
@@ -774,7 +801,8 @@ class WinWindow
     ret != WIN_FALSE
   end
 
-  # Displays the window in its current size and position. This is similar to show!, except the window is not activated.
+  # Displays the window in its current size and position. This is similar to show!, except the 
+  # window is not activated.
   #
   # http://msdn.microsoft.com/en-us/library/ms633548(VS.85).aspx
   def show_na!
@@ -782,7 +810,9 @@ class WinWindow
     ret != WIN_FALSE
   end
 
-  # Activates and displays the window. If the window is minimized or maximized, the system restores it to its original size and position. An application should use this when restoring a minimized window.
+  # Activates and displays the window. If the window is minimized or maximized, the system 
+  # restores it to its original size and position. An application should use this when restoring a 
+  # minimized window.
   #
   # http://msdn.microsoft.com/en-us/library/ms633548(VS.85).aspx
   def restore!
@@ -790,7 +820,8 @@ class WinWindow
     ret != WIN_FALSE
   end
 
-  # Sets the show state based on the SW_ value specified in the STARTUPINFO structure passed to the CreateProcess function by the program that started the application. 
+  # Sets the show state based on the SW_ value specified in the STARTUPINFO structure passed to 
+  # the CreateProcess function by the program that started the application. 
   #
   # http://msdn.microsoft.com/en-us/library/ms633548(VS.85).aspx
   def show_default!
@@ -798,7 +829,8 @@ class WinWindow
     ret != WIN_FALSE
   end
 
-  # Windows 2000/XP: Minimizes the window, even if the thread that owns the window is not responding. This should only be used when minimizing windows from a different thread.
+  # Windows 2000/XP: Minimizes the window, even if the thread that owns the window is not 
+  # responding. This should only be used when minimizing windows from a different thread.
   #
   # http://msdn.microsoft.com/en-us/library/ms633548(VS.85).aspx
   def force_minimize!
@@ -806,8 +838,14 @@ class WinWindow
     ret != WIN_FALSE
   end
 
-  # destroy! destroys the window. #destroy! sends WM_DESTROY and WM_NCDESTROY messages to the window to deactivate it and remove the keyboard focus from it. #destroy! also destroys the window's menu, flushes the thread message queue, destroys timers, removes clipboard ownership, and breaks the clipboard viewer chain (if the window is at the top of the viewer chain).
-  # If the specified window is a parent or owner window, #destroy! automatically destroys the associated child or owned windows when it destroys the parent or owner window. #destroy! first destroys child or owned windows, and then it destroys the parent or owner window.
+  # destroy! destroys the window. #destroy! sends WM_DESTROY and WM_NCDESTROY messages to the 
+  # window to deactivate it and remove the keyboard focus from it. #destroy! also destroys the 
+  # window's menu, flushes the thread message queue, destroys timers, removes clipboard ownership, 
+  # and breaks the clipboard viewer chain (if the window is at the top of the viewer chain).
+  #
+  # If the specified window is a parent or owner window, #destroy! automatically destroys the 
+  # associated child or owned windows when it destroys the parent or owner window. #destroy! first 
+  # destroys child or owned windows, and then it destroys the parent or owner window.
   # #destroy! also destroys modeless dialog boxes.
   #
   # http://msdn.microsoft.com/en-us/library/ms632682(VS.85).aspx
@@ -817,7 +855,10 @@ class WinWindow
   end
 
   # called to forcibly close the window. 
-  # the argument force, if true, will force the destruction of the window if an initial attempt fails to gently close the window using WM_CLOSE. 
+  #
+  # the argument force, if true, will force the destruction of the window if an initial attempt 
+  # fails to gently close the window using WM_CLOSE. 
+  #
   # if false, only the close with WM_CLOSE is attempted
   #
   # http://msdn.microsoft.com/en-us/library/ms633492(VS.85).aspx
@@ -839,8 +880,9 @@ class WinWindow
 
   # tries to click on this Window (using PostMessage sending BM_CLICK message). 
   #
-  # Clicking might not always work! Especially if the window is not focused (frontmost application). 
-  # The BM_CLICK message might just be ignored, or maybe it will just focus the hwnd but not really click.
+  # Clicking might not always work! Especially if the window is not focused (frontmost 
+  # application). The BM_CLICK message might just be ignored, or maybe it will just focus the hwnd 
+  # but not really click.
   def click!
     WinUser.PostMessageA(hwnd, BM_CLICK, 0, nil)
   end
@@ -883,20 +925,22 @@ class WinWindow
   
   # Creates a bitmap image of this window (a screenshot). 
   #
-  # Returns the bitmap as represented by three FFI objects: a BITMAPFILEHEADER, a BITMAPINFOHEADER, and a
-  # pointer to actual bitmap data. 
+  # Returns the bitmap as represented by three FFI objects: a BITMAPFILEHEADER, a BITMAPINFOHEADER, 
+  # and a pointer to actual bitmap data. 
   #
-  # See also #capture_to_bmp_blob and #capture_to_bmp_file - probably more useful to the user than this method. 
+  # See also #capture_to_bmp_blob and #capture_to_bmp_file - probably more useful to the user than 
+  # this method. 
   #
   # takes an options hash:
   # * :dc => what device context to use 
-  #   * :client - captures the client area, which excludes window trimmings like title bar, resize bars, etc.
+  #   * :client - captures the client area, which excludes window trimmings like title bar, resize 
+  #     bars, etc.
   #   * :window (default) - capturse the window area, including window trimmings. 
   # * :set_foreground => whether to try to set this to be the foreground 
   #   * true - calls to #set_foreground!
   #   * false - doesn't call to any functions to set this to be the foreground
-  #   * :really (default) - calls to #really_set_foreground!. this is the default because really being 
-  #     in the foreground is rather important when taking a screenshot. 
+  #   * :really (default) - calls to #really_set_foreground!. this is the default because really 
+  #     being in the foreground is rather important when taking a screenshot. 
   def capture_to_bmp_structs(options={})
     options=handle_options(options, :dc => :window, :set_foreground => :really)
     case options[:set_foreground]
@@ -909,7 +953,9 @@ class WinWindow
       raise ArgumentError, ":set_foreground option is invalid. expected values are :really, true, or false/nil. received #{options[:set_foreground]} (#{options[:set_foreground].class})"
     end
     if options[:set_foreground]
-      sleep 0.2 # if setting foreground, sleep a tick - sometimes it still hasn't show up even when it is the foreground window; sometimes it's still only partway-drawn 
+      # if setting foreground, sleep a tick - sometimes it still hasn't show up even when it is 
+      # the foreground window; sometimes it's still only partway-drawn 
+      sleep 0.2 
     end
     case options[:dc]
     when :client
@@ -978,11 +1024,13 @@ class WinWindow
   end
   # captures this window to a bitmap image (a screenshot). 
   #
-  # Returns the bitmap as represented by a blob (a string) of bitmap data, including the BITMAPFILEHEADER, 
-  # BITMAPINFOHEADER, and data. This can be written directly to a file (though if you want that, 
-  # #capture_to_bmp_file is probably what you want), or passed to ImageMagick, or whatever you like. 
+  # Returns the bitmap as represented by a blob (a string) of bitmap data, including the 
+  # BITMAPFILEHEADER, BITMAPINFOHEADER, and data. This can be written directly to a file (though if 
+  # you want that, #capture_to_bmp_file is probably what you want), or passed to ImageMagick, or 
+  # whatever you like. 
   #
-  # takes an options hash. see the documentation on #capture_to_bmp_structs for what options are accepted. 
+  # takes an options hash. see the documentation on #capture_to_bmp_structs for what options are 
+  # accepted. 
   def capture_to_bmp_blob(options={})
     capture_to_bmp_structs(options).map do |struct|
       if struct.is_a?(FFI::Pointer)
@@ -997,9 +1045,11 @@ class WinWindow
   end
   
   # captures this window to a bitmap image (a screenshot). 
+  #
   # stores the bitmap to a filename specified in the first argument. 
   #
-  # takes an options hash. see the documentation on #capture_to_bmp_structs for what options are accepted. 
+  # takes an options hash. see the documentation on #capture_to_bmp_structs for what options are 
+  # accepted. 
   def capture_to_bmp_file(filename, options={})
     File.open(filename, 'wb') do |file|
       file.write(capture_to_bmp_blob(options))
@@ -1008,7 +1058,8 @@ class WinWindow
 
   private
   FORMAT_MESSAGE_FROM_SYSTEM=0x00001000 # :nodoc:
-  # get the last error from GetLastError, format an error message with FormatMessage, and raise a WinWindow::SystemError 
+  # get the last error from GetLastError, format an error message with FormatMessage, and raise 
+  # a WinWindow::SystemError 
   def self.system_error(function)
     code=WinKernel.GetLastError
     
@@ -1022,7 +1073,10 @@ class WinWindow
   public
     
   # iterates over each child, yielding a WinWindow object. 
-  # raises a WinWindow::NotExistsError if the window does not exist, or a WinWindow::SystemError if a System Error errors.
+  #
+  # raises a WinWindow::NotExistsError if the window does not exist, or a WinWindow::SystemError 
+  # if a System Error errors.
+  #
   # use #children to get an Enumerable object. 
   #
   # http://msdn.microsoft.com/en-us/library/ms633494(VS.85).aspx
@@ -1076,11 +1130,14 @@ class WinWindow
   #
   # Options:
   # * :interval is the length of time in seconds between each attempt (default 0.05)
-  # * :set_foreground is whether the window should be activated first, since button-clicking is much more likely to fail if the window isn't focused (default true)
-  # * :exception is the exception class or instance that will be raised if we can't click the button (default nil, no exception is raised, the return value indicates success/failure)
+  # * :set_foreground is whether the window should be activated first, since button-clicking is 
+  #   much more likely to fail if the window isn't focused (default true)
+  # * :exception is the exception class or instance that will be raised if we can't click the 
+  #   button (default nil, no exception is raised, the return value indicates success/failure)
   #
   # Raises ArgumentError if invalid options are given. 
-  # Raises a WinWindow::NotExistsError if the button doesn't exist, or if this window doesn't exist, or a WinWindow::SystemError if a System Error occurs (from #each_child)
+  # Raises a WinWindow::NotExistsError if the button doesn't exist, or if this window doesn't 
+  # exist, or a WinWindow::SystemError if a System Error occurs (from #each_child)
   def click_child_button_try_for!(button_text, time, options={})
     options=handle_options(options, {:set_foreground => true, :exception => nil, :interval => 0.05})
     button=child_button(button_text) || (raise WinWindow::NotExistsError, "Button #{button_text.inspect} not found")
@@ -1097,9 +1154,10 @@ class WinWindow
     return waiter_options[:condition].call
   end
 
-  # returns a WinWindow that is a child of this that matches the given button_text (Regexp or #to_s-able) 
-  # or nil if no such child exists. 
-  # & is stripped when matching so don't include it. String comparison is case-insensitive. 
+  # returns a WinWindow that is a child of this that matches the given button_text (Regexp or 
+  # #to_s-able) or nil if no such child exists. 
+  #
+  # "&" is stripped when matching so don't include it. String comparison is case-insensitive. 
   #
   # May raise a WinWindow::SystemError from #each_child
   def child_button(button_text)
@@ -1111,8 +1169,10 @@ class WinWindow
   # Finds a child of this window which follows a label with the given text. 
   #
   # Options:
-  # - :control_class_name is the class name of the control you are looking for. Defaults to nil, which accepts any class name. 
-  # - :label_class_name is the class name of the label preceding the control you are looking for. Defaults to 'Static'
+  # - :control_class_name is the class name of the control you are looking for. Defaults to nil, 
+  #   which accepts any class name. 
+  # - :label_class_name is the class name of the label preceding the control you are looking for. 
+  #   Defaults to 'Static'
   def child_control_with_preceding_label(preceding_label_text, options={})
     options=handle_options(options, :control_class_name => nil, :label_class_name => "Static")
     
@@ -1219,7 +1279,8 @@ class WinWindow
     end
   end
   
-  # Returns a WinWindow representing the current foreground window (the window with which the user is currently working).
+  # Returns a WinWindow representing the current foreground window (the window with which the user 
+  # is currently working).
   #
   # http://msdn.microsoft.com/en-us/library/ms633505%28VS.85%29.aspx
   def self.foreground_window
@@ -1231,7 +1292,8 @@ class WinWindow
     end
   end
   
-  # Returns a WinWindow representing the desktop window. The desktop window covers the entire screen. The desktop window is the area on top of which other windows are painted. 
+  # Returns a WinWindow representing the desktop window. The desktop window covers the entire 
+  # screen. The desktop window is the area on top of which other windows are painted. 
   #
   # http://msdn.microsoft.com/en-us/library/ms633504%28VS.85%29.aspx
   def self.desktop_window
