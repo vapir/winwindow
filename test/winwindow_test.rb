@@ -196,4 +196,58 @@ class TestWinWindow < MiniTest::Unit::TestCase
     end
     @ie_ole, @win = *new_ie_ole unless @win.exists?
   end
+  def test_click
+    # dismissing the popup relies on clicking; we'll use that to test. 
+    with_popup do
+      assert @win.enabled_popup
+    end
+    assert !@win.enabled_popup
+  end
+  def test_screen_capture
+    # writing to file tests all the screen capture functions (at least that they don't error)
+    filename = 'winwindow.bmp'
+    @win.capture_to_bmp_file filename
+    assert File.exists? filename
+    assert File.size(filename) > 0
+    # todo: check it's valid bmp with the right size (check #window_rect/#client_rect)? use rmagick? 
+    File.unlink filename
+  end
+  def test_children_and_all
+    assert @win.children.is_a?(Enumerable)
+    assert WinWindow::All.is_a?(Enumerable)
+    cwins=[]
+    @win.each_child do |cwin|
+      assert cwin.is_a?(WinWindow)
+      assert cwin.exists?
+      assert cwin.child_of?(@win)
+      cwins << cwin
+    end
+    assert_equal @win.children.to_a, cwins
+    assert cwins.size > 0
+    all_wins = []
+    WinWindow.each_window do |win|
+      assert win.is_a?(WinWindow)
+      assert win.exists?
+      all_wins << win
+    end
+    assert_equal WinWindow::All.to_a, all_wins
+    assert all_wins.size > 0
+  end
+  def test_finding
+    assert WinWindow.find_first_by_text(//).is_a?(WinWindow)
+    found_any = false
+    WinWindow.find_all_by_text(//).each do |win|
+      assert win.is_a?(WinWindow)
+      assert win.exists?
+      found_any = true
+    end
+    assert found_any
+    assert(WinWindow.find_only_by_text(@win.retrieve_text)==@win)
+  end
+  def test_foreground_desktop
+    assert WinWindow.foreground_window.is_a?(WinWindow)
+    assert WinWindow.foreground_window.exists?
+    assert WinWindow.desktop_window.is_a?(WinWindow)
+    assert WinWindow.desktop_window.exists?
+  end
 end
