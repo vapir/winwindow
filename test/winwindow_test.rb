@@ -51,6 +51,14 @@ class TestWinWindow < MiniTest::Unit::TestCase
     end
   end
   
+  def assert_eventually(message=nil, options={}, &block)
+    options[:exception] ||= nil
+    timeout = options.delete(:timeout) || 16
+    result = WinWindow::Waiter.try_for(timeout, options, &block)
+    message ||= "Expected block to eventually yield true; after #{timeout} seconds it was #{result}"
+    assert result, message
+  end
+  
   def test_hwnd
     assert_equal @win.hwnd, @ie_ole.HWND
   end
@@ -63,10 +71,14 @@ class TestWinWindow < MiniTest::Unit::TestCase
     assert_match /google/i, @win.text # might fail? it is not meant to retrieve text of a control in another application? well, it seems to work. 
   end
   def test_set_text
-    @win.set_text! 'foobar'
-    assert_equal 'foobar', @win.text
-    @win.send_set_text! 'bazqux'
-    assert_equal 'bazqux', @win.retrieve_text
+    assert_eventually do
+      @win.set_text! 'foobar'
+      @win.text=='foobar'
+    end
+    assert_eventually do
+      @win.send_set_text! 'bazqux'
+      @win.retrieve_text=='bazqux'
+    end
   end
   def test_popup
     text='popup!'
@@ -170,12 +182,18 @@ class TestWinWindow < MiniTest::Unit::TestCase
     # no idea when this ever does anything, just seems to return false. will be content with it not erroring, I suppose. 
     @ie_ole, @win = *new_ie_ole unless @win.exists?
 
-    @win.end_task!
-    assert !@win.exists?
+    assert_eventually do
+      @win.really_set_foreground!
+      @win.end_task!
+      !@win.exists?
+    end
     @ie_ole, @win = *new_ie_ole unless @win.exists?
     
-    @win.send_close!
-    assert !@win.exists?
+    assert_eventually do
+      @win.really_set_foreground!
+      @win.send_close!
+      !@win.exists?
+    end
     @ie_ole, @win = *new_ie_ole unless @win.exists?
   end
 end
