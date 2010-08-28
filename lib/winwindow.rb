@@ -23,7 +23,17 @@ class WinWindow
   # base class from which WinWindow Errors inherit. 
   class Error < StandardError;end
   # exception which is raised when an underlying method of the operating system encounters an error 
-  class SystemError < Error;end
+  class SystemError < Error
+    attr_reader :function
+    attr_reader :code
+    attr_reader :system_message
+    def initialize(message, stuff={})
+      super(message)
+      @function=stuff[:function]
+      @code=stuff[:code]
+      @system_message=stuff[:system_message]
+    end
+  end
   # exception raised when a window which is expected to exist does not exist 
   class NotExistsError < Error;end
   # exception raised when a thing was expected to match another thing but didn't 
@@ -1076,17 +1086,15 @@ class WinWindow
   # a WinWindow::SystemError 
   def self.system_error(function)
     code=WinKernel.GetLastError
-    
+    message = "#{function} encountered an error\nSystem Error Code #{code}"
     if AttachLib::CanTrustFormatMessage
-      dwFlags=FORMAT_MESSAGE_FROM_SYSTEM
       buff_size=65535
       buff="\1"*buff_size
-      len=WinKernel.FormatMessageA(dwFlags, nil, code, 0, buff, buff_size)
+      len=WinKernel.FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nil, code, 0, buff, buff_size)
       system_error_message="\n"+buff[0...len]
-    else
-      system_error_message = ''
+      message+="\n"+system_error_message
     end
-    raise WinWindow::SystemError, "#{function} encountered an error\nSystem Error Code #{code}"+system_error_message
+    raise WinWindow::SystemError.new(message, :function => function, :code=> code, :system_message => system_error_message)
   end
   public
     
