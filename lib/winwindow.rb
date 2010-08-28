@@ -1114,7 +1114,26 @@ class WinWindow
   def children
     Enumerator.new(self, :each_child)
   end
-
+  
+  def recurse_each_child(options={})
+    options=handle_options(options, :rescue_enum_child_windows => true)
+    ycomb do |recurse|
+      proc do |win_window|
+        yield win_window
+        begin
+          win_window.each_child do |child_window|
+            recurse.call child_window
+          end
+        rescue SystemError
+          raise unless options[:rescue_enum_child_windows] && $!.function=='EnumChildWindows'
+        end
+      end
+    end.call(self)
+  end
+  def children_recursive(options={})
+    Enumerator.new(self, :recurse_each_child, options)
+  end
+  
   # true if comparing an object of the same class with the same hwnd (integer) 
   def eql?(oth)
     oth.class==self.class && oth.hwnd==self.hwnd
