@@ -660,7 +660,7 @@ class WinWindow
     options=handle_options(options, :error => false)
     try_harder=false
     mapped_vk_menu=WinUser.MapVirtualKeyA(VK_MENU, 0)
-    ::Waiter.try_for(2, :exception => (options[:error] && WinWindow::Error.new("Failed to set foreground window"))) do
+    Waiter.try_for(2, :exception => (options[:error] && WinWindow::Error.new("Failed to set foreground window"))) do
       if iconic?
         restore!
       end
