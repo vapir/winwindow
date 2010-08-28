@@ -243,6 +243,11 @@ class TestWinWindow < MiniTest::Unit::TestCase
     end
     assert found_any
     assert(WinWindow.find_only_by_text(@win.retrieve_text)==@win)
+    with_ie do
+      assert_raises(WinWindow::MatchError) do
+        WinWindow.find_only_by_text(@win.retrieve_text)
+      end
+    end
   end
   def test_foreground_desktop
     assert WinWindow.foreground_window.is_a?(WinWindow)
