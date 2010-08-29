@@ -1115,6 +1115,12 @@ class WinWindow
     Enumerator.new(self, :each_child)
   end
   
+  # iterates over each child recursively, yielding a WinWindow object for each child. 
+  #
+  # raises a WinWindow::NotExistsError if the window does not exist, or a WinWindow::SystemError 
+  # if a System Error errors.
+  #
+  # use #children_recursive to get an Enumerable object. 
   def recurse_each_child(options={})
     options=handle_options(options, :rescue_enum_child_windows => true)
     ycomb do |recurse|
@@ -1130,6 +1136,8 @@ class WinWindow
       end
     end.call(self)
   end
+  # returns an Enumerable object that can iterate over each child of this window recursively, 
+  # yielding a WinWindow object for each child. 
   def children_recursive(options={})
     Enumerator.new(self, :recurse_each_child, options)
   end
