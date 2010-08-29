@@ -1,7 +1,10 @@
 require 'watir/handle_options'
 require 'watir/waiter'
 
-# Class that wraps useful methods of user32.dll involving windows in MS Windows 
+# WinWindow: A Ruby library to wrap windows API calls relating to hWnd window handles. 
+#
+# The WinWindow class represents a window, wrapping a hWnd and exposing a Ruby API corresponding to 
+# many useful Windows API functions relating to a hWnd. 
 class WinWindow
   # :stopdoc:
   
