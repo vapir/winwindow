@@ -52,7 +52,7 @@ class WinWindow # :nodoc:all
       unless time.is_a?(Numeric) && options.is_a?(Hash)
         raise TypeError, "expected arguments are time (a numeric) and, optionally, options (a Hash). received arguments #{time.inspect} (#{time.class}), #{options.inspect} (#{options.class})"
       end
-      options=WinWindow.handle_options(options, {:interval => 0.5, :condition => proc{|_ret| _ret}, :exception => WaiterError})
+      options=WinWindow.handle_options(options, {:interval => 0.02, :condition => proc{|_ret| _ret}, :exception => WaiterError})
       started=Time.now
       begin
         ret=yield
