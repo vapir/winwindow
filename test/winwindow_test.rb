@@ -276,7 +276,10 @@ class TestWinWindow < MiniTest::Unit::TestCase
     assert(WinWindow.find_only_by_text(@win.retrieve_text)==@win)
     with_ie do
       assert_raises(WinWindow::MatchError) do
-        WinWindow.find_only_by_text(@win.retrieve_text)
+        WinWindow::Waiter.try_for(32) do # this doesn't always come up immediately, so give it a moment 
+          WinWindow.find_only_by_text(@win.retrieve_text)
+          false
+        end
       end
     end
   end
