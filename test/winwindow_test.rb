@@ -18,8 +18,16 @@ class TestWinWindow < MiniTest::Unit::TestCase
   # make a new IE win32ole window for testing. also send it to the given url (default is google) and wait for that to load. 
   def new_ie_ole(url='http://google.com')
     require 'win32ole'
-    ie_ole = WIN32OLE.new('InternetExplorer.Application')
-    ie_ole.Visible=true
+    ie_ole=nil
+    WinWindow::Waiter.try_for(32) do
+      begin
+        ie_ole = WIN32OLE.new('InternetExplorer.Application')
+        ie_ole.Visible=true
+        true
+      rescue WIN32OLERuntimeError, NoMethodError
+        false
+      end
+    end
     ie_ole.Navigate url
     WinWindow::Waiter.try_for(32, :exception => "The browser's readyState did not become ready for interaction") do
       [3, 4].include?(ie_ole.readyState)
