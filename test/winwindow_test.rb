@@ -47,7 +47,7 @@ class TestWinWindow < MiniTest::Unit::TestCase
   def launch_popup(text="popup!", ie_ole=@ie_ole)
     raise ArgumentError, "No double-quotes or backslashes, please" if text =~ /["\\]/
     ie_ole.Navigate('javascript:alert("'+text+'")')
-    popup = WinWindow::Waiter.try_for(8){ WinWindow.new(@ie_ole.HWND).enabled_popup }
+    popup = WinWindow::Waiter.try_for(16, :exception => "No popup appeared on the browser!"){ WinWindow.new(@ie_ole.HWND).enabled_popup }
   end
   
   def with_popup(text="popup!", ie_ole=@ie_ole)
