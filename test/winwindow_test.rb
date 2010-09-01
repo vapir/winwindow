@@ -215,7 +215,7 @@ class TestWinWindow < MiniTest::Unit::TestCase
     # writing to file tests all the screen capture functions (at least that they don't error)
     filename = 'winwindow.bmp'
     @win.capture_to_bmp_file filename
-    assert File.exists? filename
+    assert File.exists?(filename)
     assert File.size(filename) > 0
     # todo: check it's valid bmp with the right size (check #window_rect/#client_rect)? use rmagick? 
     File.unlink filename
