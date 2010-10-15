@@ -1,0 +1,9 @@
+= 0.4.0
+Initial stable release version. Why 0.4.0? I figure it's gone through at least 3 somewhat major 
+API changes, even if they weren't released, so call them 0.0.1 through 0.3.*. It's not yet a 
+1.0.0, will see what should be done to get it there. 
+
+= 0.0.0 ~ <0.4.0
+Various evolutions of the API and internal workings of the library - changing from HWND to 
+WinWindow name; using ruby 1.8's DL library, trying out Win32API and ruby 1.9 DL, finally settling 
+on FFI. It's in the git logs; I won't go into particular detail here. 
