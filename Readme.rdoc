@@ -1,0 +1,11 @@
+= WinWindow
+
+WinWindow is a Ruby library to wrap windows API calls relating to hWnd window handles. 
+
+* {Main Project site}[http://winwindow.vapir.org/]
+* {RDoc}[http://winwindow.vapir.org/rdoc]
+* {Source code repository (at Github)}[http://github.com/vapir/winwindow]
+* {Gem (at RubyGems.org)}[http://rubygems.org/gems/winwindow]
+* {Issue tracker (at Github)}[http://github.com/vapir/winwindow/issues]
+* {Wiki (at Github)}[http://wiki.github.com/vapir/winwindow/]
+
