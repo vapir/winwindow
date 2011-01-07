@@ -111,11 +111,6 @@ class WinWindow
         # use ffi's #callback. 
         typedef cb, callback_type_name
       end
-      #options[:convention] = @ffi_module.instance_variable_defined?('@ffi_convention') ? @ffi_module.instance_variable_get('@ffi_convention') : :default
-      #options[:enums] = @ffi_module.instance_variable_get('@ffi_enums') if @ffi_module.instance_variable_defined?('@ffi_enums')
-      #unless @ffi_module.instance_variable_defined?('@ffi_callbacks')
-      #  @ffi_module.instance_variable_set('@ffi_callbacks', cb)
-      #end
       
       # perform some hideous class_eval'ing to dynamically define the callback method such that it will take a block 
       metaclass=class << self;self;end
