@@ -47,7 +47,6 @@ class WinWindow
   module AttachLib # :nodoc: all
     IsWin64=nil # TODO/FIX: detect this! 
 
-#=begin
     # here begins the FFI version. this one needs to hack improperly into FFI's internals, bypassing its
     # broken API for #callback which doesn't set the calling convention, causing segfaults. 
     begin
@@ -135,61 +134,6 @@ class WinWindow
       #end
       nil
     end
-#=end
-=begin
-    # here begins the Win32::API version. this one doesn't work because of a hard-coded limit on 
-    # callbacks in win32/api.c combined with a lack of any capacity to remove any callbacks. 
-    require 'win32/api'
-
-    # basic types that Win32::API recognizes
-    Types={ :char => 'I', # no 8-bit type in Win32::API?
-            :uchar => 'I', # no unsigned types in Win32::API?
-            :int => 'I',
-            :uint => 'I',
-            :long => 'L',
-            :ulong => 'L',
-            :void => 'V',
-            :pointer => 'P',
-            :callback => 'K',
-            :string => 'P', # 'S' works here on mingw32, but not on mswin32 
-          }
-    
-    def use_lib(lib)
-      @lib=lib
-    end
-    # this takes arguments in the order that they're given in c/c++ so that signatures look kind of like the source
-    def attach(return_type, function_name, *arg_types)
-      the_function=Win32::API.new(function_name.to_s, arg_types.map{|arg_type| Types[arg_type] }.join(''), Types[return_type], @lib)
-      metaclass=class << self;self;end
-      metaclass.send(:define_method, function_name) do |*args|
-        the_function.call(*args)
-      end
-      nil
-    end
-    # this takes arguments like #attach, but with a name for the callback's type on the front. 
-    def callback(callback_type_name, return_type, callback_method_name, *arg_types)
-      Types[callback_type_name]=Types[:callback]
-      
-      # perform some hideous class_eval'ing to dynamically define the callback method such that it will take a block 
-      metaclass=class << self;self;end
-      metaclass.class_eval("def #{callback_method_name}(&block)
-        #{callback_method_name}_with_arg_stuff_in_scope(block)
-      end")
-      types=Types
-      metaclass.send(:define_method, callback_method_name.to_s+"_with_arg_stuff_in_scope") do |block|
-        return Win32::API::Callback.new(arg_types.map{|t| types[t]}.join(''), types[return_type], &block)
-      end
-      def remove_#{callback_method_name}(callback_method)
-        # Win32::API has no support for removing callbacks? 
-        nil
-      end")
-      # don't use define_method as this will be called from an ensure block which segfaults ruby 1.9.1. see http://redmine.ruby-lang.org/issues/show/2728
-      #metaclass.send(:define_method, "remove_"+callback_method_name.to_s) do |callback_method|
-      #  nil
-      #end
-      nil
-    end
-=end
     def self.add_type(hash)
       hash.each_pair do |key, value|
         unless Types.key?(value)
