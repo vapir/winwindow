@@ -103,8 +103,14 @@ class WinWindow
 
         cb = FFI::CallbackInfo.new(find_type(types[return_type]), arg_types.map{|e| find_type(types[e]) }, options)
 
+        # the below is for ffi < 1.0; @ffi_callbacks goes away in the future. it's ignored by 
+        # newer versions of ffi. so no harm in continuing to set it here. 
         @ffi_callbacks = Hash.new unless defined?(@ffi_callbacks)
         @ffi_callbacks[callback_type_name] = cb
+        # and the below is for newer versions of ffi (1.0.*). of course, @ffi_module.callback 
+        # works in newer. at some point I'll drop support for older broken versions and just 
+        # use ffi's #callback. 
+        typedef cb, callback_type_name
       end
       #options[:convention] = @ffi_module.instance_variable_defined?('@ffi_convention') ? @ffi_module.instance_variable_get('@ffi_convention') : :default
       #options[:enums] = @ffi_module.instance_variable_get('@ffi_enums') if @ffi_module.instance_variable_defined?('@ffi_enums')
