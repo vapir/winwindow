@@ -14,7 +14,7 @@ WinWindow::Spec = Gem::Specification.new do |s|
   s.requirements = ["Microsoft Windows, probably with some sort of NT kernel"]
   s.require_path = 'lib'
 
-  s.add_dependency 'ffi', '>= 0.5.4', '< 1.0.0'
+  s.add_dependency 'ffi', '>= 0.5.4', '< 1.1.0'
 
 #  s.add_development_dependency 'minitest' # for winwindow_test.rb. not going to say the gem is needed because it's built into 1.9.*, but you need the gem for 1.8.*
 
