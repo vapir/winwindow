@@ -1,5 +1,5 @@
 class WinWindow;end
-WinWindow::Version = '0.4.0'
+WinWindow::Version = '0.4.1'
 
 WinWindow::Spec = Gem::Specification.new do |s|
   s.name = 'winwindow'
